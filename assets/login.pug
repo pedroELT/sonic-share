@@ -1,0 +1,34 @@
+html
+  head
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css")
+    link(rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css")
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+    style.
+      body {
+        padding: 2vw;
+      }
+      .logo {
+        max-width: 5vw;
+        max-height: 5vh;
+      }
+      .hide {
+        display: none;
+      }
+    
+  body
+    div(class="block media")
+      div(class='media-left')
+        img.logo(src='/logo.png')
+      div(class='media-content')
+        span.title Sonic Share
+    form(class='block' action='/login' method='POST')
+      .field  
+        .control
+          input.input(type='text' name='user' placeholder='User' required)
+      .field  
+        .control
+          input.input(type='password' name='password' placeholder='Password' required)
+      .field  
+        .control
+          input(class='button is-info' type='submit' value='Log In')

@@ -1,0 +1,181 @@
+html
+  head
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css")
+    link(rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css")
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+    style.
+      body {
+        padding: 2vw;
+      }
+      .logo {
+        max-width: 5vw;
+        max-height: 5vh;
+      }
+      .hide {
+        display: none;
+      }
+      .link {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 25vw;
+      }
+    script.
+      const updateStatus = (statusResponse) => {
+        statusResponse = JSON.parse(statusResponse);
+        const status = document.getElementById('status');
+        const statusIcon = document.getElementById('statusIcon');
+        status.classList.remove('is-success');
+        status.classList.remove('is-danger');
+        statusIcon.classList.remove('fa-link');
+        statusIcon.classList.remove('fa-unlink');
+        if (statusResponse) {
+          status.classList.add('is-success');
+          statusIcon.classList.add('fa-unlink');
+        } else {
+          status.classList.add('is-danger');
+          statusIcon.classList.add('fa-link');
+        }
+      };
+
+      const getStatus = () => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", '/share?token=!{token}', true);
+        xhr.onreadystatechange = function() { 
+          if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            updateStatus(xhr.response);
+          }
+        };
+        xhr.send();
+      };
+
+      const changeStatus = () => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", '/share?token=!{token}', true);
+        xhr.onreadystatechange = function() { 
+          if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            updateStatus(xhr.response);
+          }
+        };
+        xhr.send();
+      };
+
+      const getLink = (file) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", `/share/${file}?token=!{token}`, true);
+        xhr.onreadystatechange = function() { 
+          if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            navigator.clipboard.writeText(xhr.response);
+            const fileElts = document.getElementsByClassName('is-active');
+            Array.prototype.forEach.call(fileElts, fileElt => fileElt.classList.remove('is-active'));
+            const fileElt = document.getElementById(file);
+            fileElt.classList.add('is-active');
+            const modal = document.getElementById('modal');
+            modal.classList.add('is-active');
+            const link = document.getElementById('link');
+            link.innerHTML = xhr.response;
+          }
+        };
+        xhr.send();
+      };
+
+      const displayFilesName = () => {
+        const files = document.getElementById('uploadName');
+        const input = document.getElementById('file-upload');
+        if (input.files.length) files.classList.remove('hide');
+        files.innerHTML = input.files.item(0).name;
+      };
+      
+      getStatus();
+  body
+    div(class="block media")
+      div(class='media-left')
+        img.logo(src='/logo.png')
+      div(class='media-content')
+        span.title Sonic Share
+      div(class='media-right')
+          a(class='button is-danger' onclick='changeStatus()' id='status')
+            span(class="icon")
+              i(class="fas fa-link" id='statusIcon')
+    form(class='tile is-ancestor is-vertical' enctype='multipart/form-data'  action='/' method='POST')
+      div(class='tile is-parent')
+        div(class='tile')
+          div(class="file")
+            label(class="file-label")
+              input(type='hidden' name='token' value=token)
+              input(type='hidden' name="MAX_FILE_SIZE" value="30000")
+              input(class='file-input' id="file-upload" name="To Share" type="file" required  onchange='displayFilesName()')
+              span(class="file-cta")
+                span(class="file-icon")
+                  i(class="fas fa-upload")
+                span(class="file-label") Upload for sharing
+              span(class="file-name hide" id='uploadName')
+      div(class='tile is-parent')
+        div(class='tile')
+          input(class='button is-info' type='submit' value='Add')
+    nav.panel.is-info
+          .panel-heading
+
+            span #{currentFolder}
+          .panel-block
+            nav.breadcrumb.is-centered(aria-label="breadcrumbs")
+              ul
+                each folder of path 
+                  if folder === currentFolder
+                    li.is-active
+                      a(href="#" aria-current="page") #{folder}
+                  else
+                    li
+                      a(href='/folder/'+folder) #{folder}
+
+          a.panel-block.notification.is-primary(id='archive' onclick='getLink(\'archive\')' style='margin-bottom: 0;')
+                span.panel-icon
+                  i.fa.fa-file-archive(aria-hidden=true)
+                span Zip of '#{currentFolder}'
+          if !root
+            a.panel-block.notification.is-warning(href='/up?token='+token style='margin-bottom: 0;')
+                  span.panel-icon
+                    i.fa.fa-arrow-left(aria-hidden=true)
+                  span Back
+          
+
+          each file of files
+            if file.dir
+              a.panel-block(href='/down/'+file.name+'?token='+token  id=file.name)
+                span.panel-icon
+                  i.fa.fa-folder(aria-hidden=true)
+                span #{file.name}
+            else
+              a.panel-block(onclick='getLink(\''+file.name+'\')' id=file.name)
+                span.panel-icon
+                  i(aria-hidden=true class='fa fa-'+file.icon)
+                span #{file.name}
+    .modal(id='modal')
+        .modal-background(id='modal-background')
+        .modal-content
+          .box.notification.is-info
+            article.media
+              .media-content
+                .content
+                  p.link(id='link')
+              .media-right
+                button.button.is-large.is-success(onclick='copy()')
+                  span
+                    i.fa.fa-copy(aria-hidden=true)
+        a.modal-close.is-large(aria-label='close' id='modal-close')
+    script.
+      const close = () => {
+        const modal = document.getElementById('modal');
+        modal.classList.remove('is-active');
+      };
+      const bck = document.getElementById('modal-background');
+      const closeBtn = document.getElementById('modal-close');
+      bck.addEventListener('click',  close);
+      closeBtn.addEventListener('click',  close);
+      const copy = () => {
+        const link = document.getElementById('link');
+        navigator.clipboard.writeText(link.innerHTML);
+      };
+
+      
+

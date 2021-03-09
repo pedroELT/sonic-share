@@ -1,0 +1,21 @@
+{
+  "name": "sonic-share",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "client": "node src/test.js",
+    "start": "node src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-parse-multipart": "^1.1.2",
+    "got": "^11.8.2",
+    "jsonwebtoken": "^8.5.1",
+    "ngrok": "^3.4.0",
+    "pug": "^3.0.2",
+    "yazl": "^2.5.1"
+  }
+}
