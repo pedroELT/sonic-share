@@ -12,9 +12,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - run: |
-          npm ci
-          npm run pack
+      - name: Install and pack
+        run: |
+          npm pack
           cp sonic-share-*.tgz sonic-share.tgz
       - name: Deploy Service
         uses: appleboy/scp-action@v0.1.4
