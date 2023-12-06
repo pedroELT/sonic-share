@@ -1,0 +1,30 @@
+name: Deploy to NAS
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: |
+          npm ci
+          npm run pack
+          cp sonic-share-*.tgz sonic-share.tgz
+      - name: Deploy Service
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.PEDROMINAS_HOST }}
+          username: ${{ secrets.PEDROMINAS_USERNAME }}
+          password: ${{ secrets.PEDROMINAS_PASSWORD }}
+          port: ${{ secrets.PEDROMINAS_PORT }}
+          source: "\
+            sonic-share.tgz
+            "
+          target: /volmue1/web/sonic-share
+          rm: true
