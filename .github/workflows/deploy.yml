@@ -26,5 +26,5 @@ jobs:
           source: "\
             sonic-share.tgz
             "
-          target: /volmue1/web/sonic-share
+          target: /volume1/web/sonic-share
           rm: true
